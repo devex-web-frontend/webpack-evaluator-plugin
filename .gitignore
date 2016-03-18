@@ -1,0 +1,4 @@
+.idea
+!.idea/jsLinters
+!.idea/inspectionProfiles
+node_modules

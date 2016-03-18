@@ -1,0 +1,29 @@
+{
+  "name": "webpack-evaluator-plugin",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run eslint",
+    "eslint": "eslint --config ./node_modules/eslint-config-dx/.eslintrc --ext .js ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devex-web-frontend/webpack-evaluator-plugin.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devex-web-frontend/webpack-evaluator-plugin/issues"
+  },
+  "homepage": "https://github.com/devex-web-frontend/webpack-evaluator-plugin#readme",
+  "devDependencies": {
+    "babel-eslint": "^5.0.0",
+    "eslint": "^1.10.3",
+    "eslint-config-dx": "devex-web-frontend/eslint-config-dx",
+    "webpack": "^1.12.14"
+  },
+  "peerDependencies": {
+    "webpack": "<2.0.0"
+  }
+}
