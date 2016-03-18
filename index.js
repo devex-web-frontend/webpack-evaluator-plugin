@@ -1,95 +1,69 @@
-const fs = require('fs');
-const vm = require('vm');
+var fs = require('fs');
+var vm = require('vm');
 
 /**
- * EntryEvaluator
+ * EntryEvaluatorPlugin
+ * @param {Array.<String>} entries - List of entries
+ * @param {String} destination - Destination file
+ * @param {Object} scope - Scope object
+ * @param {Function} template - Destination file template
  */
-export default class EntryEvaluatorPlugin {
-	/**
-	 * @type {Array.<String>}
-	 * @private
-	 */
-	_entries = [];
-
-	/**
-	 * @type {String}
-	 * @private
-	 */
-	_destination;
-
-	/**
-	 * @type {Object}
-	 * @private
-	 */
-	_scope;
-
-	/**
-	 * @type {Function}
-	 * @private
-	 */
-	_template;
-
-	/**
-	 * @param {Array.<String>} entries - List of entries
-	 * @param {String} destination - Destination file
-	 * @param {Object} scope - Scope object
-	 * @param {Function} template - Destination file template
-	 */
-	constructor(entries, destination, scope, template) {
-		this._entries = entries;
-		this._destination = destination;
-		this._scope = scope;
-		this._template = template;
-	}
-
-	apply(compiler) {
-		compiler.plugin('emit', (compilation, done) => {
-			try {
-				const stats = compilation.getStats().toJson();
-				const context = this._createContext();
-				this._entries.forEach(entry => {
-					let source;
-					if (fs.existsSync(entry)) {
-						//file on disk
-						source = fs.readFileSync(entry);
-					} else {
-						const asset = findAsset(entry, compilation, stats);
-						if (!asset) {
-							throw new Error(`Output file not found: "${entry}"`);
-						}
-						source = asset.source();
-						source = `module.exports = ${source};`;
-					}
-					vm.runInContext(source, context);
-				});
-				let exported = context.module.exports;
-				if (exported && exported.default) {
-					exported = exported.default;
-				}
-				const result = this._template({
-					html: exported,
-					assets: getAssetsFromCompiler(compilation, stats)
-				});
-				compilation.assets[this._destination] = createAssetFromContents(result);
-			} catch (error) {
-				return done(error);
-			}
-
-			return done();
-		});
-	}
-
-	_createContext() {
-		const context = vm.createContext(this._scope);
-		context.window = context;
-		context.exports = {};
-		context.module = {
-			exports: context.exports
-		};
-		context.global = context;
-		return context;
-	}
+function EntryEvaluatorPlugin(entries, destination, scope, template) {
+	this._entries = entries;
+	this._destination = destination;
+	this._scope = scope;
+	this._template = template;
 }
+
+EntryEvaluatorPlugin.prototype.apply = function apply(compiler) {
+	compiler.plugin('emit', function(compilation, done) {
+		try {
+			var stats = compilation.getStats().toJson();
+			var context = this._createContext();
+			this._entries.forEach(function(entry) {
+				var source;
+				if (fs.existsSync(entry)) {
+					//file on disk
+					source = fs.readFileSync(entry);
+				} else {
+					var asset = findAsset(entry, compilation, stats);
+					if (!asset) {
+						throw new Error(`Output file not found: "${entry}"`);
+					}
+					source = asset.source();
+					source = `module.exports = ${source};`;
+				}
+				vm.runInContext(source, context);
+			}.bind(this));
+			var exported = context.module.exports;
+			if (exported && exported.default) {
+				exported = exported.default;
+			}
+			var result = this._template({
+				html: exported,
+				assets: getAssetsFromCompiler(compilation, stats)
+			});
+			compilation.assets[this._destination] = createAssetFromContents(result);
+		} catch (error) {
+			return done(error);
+		}
+
+		return done();
+	}.bind(this));
+};
+
+EntryEvaluatorPlugin.prototype._createContext = function _createContext() {
+	const context = vm.createContext(this._scope);
+	context.window = context;
+	context.exports = {};
+	context.module = {
+		exports: context.exports
+	};
+	context.global = context;
+	return context;
+};
+
+module.exports = EntryEvaluatorPlugin;
 
 function findAsset(src, compiler, webpackStatsJson) {
 	var asset = compiler.assets[src];
