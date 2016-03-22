@@ -54,7 +54,6 @@ EntryEvaluatorPlugin.prototype.apply = function apply(compiler) {
 
 EntryEvaluatorPlugin.prototype._createContext = function _createContext() {
 	const context = vm.createContext(this._scope);
-	context.window = context;
 	context.exports = {};
 	context.module = {
 		exports: context.exports
