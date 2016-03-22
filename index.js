@@ -33,7 +33,13 @@ EntryEvaluatorPlugin.prototype.apply = function apply(compiler) {
 					source = asset.source();
 					source = `module.exports = ${source};`;
 				}
-				vm.runInContext(source, context);
+				try {
+					vm.runInContext(source, context);
+				} catch (e) {
+					console.log();
+					console.log('WEBPACK-EVALUATOR-PLUGIN: ERROR IN ', entry);
+					throw e;
+				}
 			}.bind(this));
 			var exported = context.module.exports;
 			if (exported && exported.default) {
