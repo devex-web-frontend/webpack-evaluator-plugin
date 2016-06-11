@@ -1,6 +1,6 @@
 {
   "name": "webpack-evaluator-plugin",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -25,5 +25,8 @@
   },
   "peerDependencies": {
     "webpack": "<2.0.0"
+  },
+  "dependencies": {
+    "stack-trace": "0.0.9"
   }
 }
