@@ -25,5 +25,8 @@
   },
   "peerDependencies": {
     "webpack": "<2.0.0"
+  },
+  "dependencies": {
+    "stack-trace": "0.0.9"
   }
 }

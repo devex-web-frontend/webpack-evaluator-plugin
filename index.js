@@ -1,5 +1,6 @@
 var fs = require('fs');
 var vm = require('vm');
+var strackTrace = require('stack-trace');
 
 /**
  * EntryEvaluatorPlugin
@@ -28,16 +29,17 @@ EntryEvaluatorPlugin.prototype.apply = function apply(compiler) {
 				} else {
 					var asset = findAsset(entry, compilation, stats);
 					if (!asset) {
-						throw new Error(`Output file not found: "${entry}"`);
+						throw new Error('Output file not found: ' + entry);
 					}
 					source = asset.source();
-					source = `module.exports = ${source};`;
+					source = 'module.exports = ' + source + ';';
 				}
 				try {
 					vm.runInContext(source, context);
 				} catch (e) {
 					console.log();
 					console.log('WEBPACK-EVALUATOR-PLUGIN: ERROR IN ', entry);
+					showPrettyError(e, source);
 					throw e;
 				}
 			}.bind(this));
@@ -120,4 +122,26 @@ function createAssetFromContents(contents) {
 			return contents.length;
 		}
 	};
+}
+
+
+function showPrettyError(err, source) {
+	var stackEntry = strackTrace.parse(err)[0];
+
+	var line = stackEntry.lineNumber;
+	var column = stackEntry.columnNumber;
+	var fileName = stackEntry.fileName;
+
+	var message = '\n'
+			+ (fileName || '(anonymous file)')
+			+ ':' + line
+			+ '\n'
+			+ source.split('\n').slice(line - 10, line).join('\n')
+			+ '\n'
+			+ Array(column).join(' ') + '^'
+			+ '\n'
+			+ source.split('\n').slice(line, line + 10).join('\n')
+			+ '\n'
+		;
+	console.log(message);
 }
